@@ -58,6 +58,7 @@ uint8_t bd1_count;
 extern  UART_HandleTypeDef huart1;
 extern  uint8_t report_data[128];
 extern uint8_t tcp_buf[39];
+uint8_t init_lte_flag =0;
 void PowerTimerCallback(void const * argument)
 {
 

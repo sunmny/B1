@@ -78,10 +78,13 @@ flash_status_t set_nvram_id_data(uint8_t *sn)
 	uint8_t userNvram[USER_NVRAM_SIZE];
 	uint32_t offset;
 	status=Flash_If_Read(userNvram, USER_NVRAM_START_ADDR, USER_NVRAM_SIZE);
+	printf("flash read status = %d \r\n",status);
 	status=Flash_If_Init();
+		printf("flash init status = %d \r\n",status);
 	if(status!=FLASH_OK)
 		return status;
 	status=Flash_If_Erase(NV_ID_DEFAULT_MSG_ADDR);
+		printf("flash erase status = %d \r\n",status);
 	if(status!=FLASH_OK)
 	{
 		Flash_If_DeInit();
@@ -92,6 +95,7 @@ flash_status_t set_nvram_id_data(uint8_t *sn)
 		offset=NV_ID_DEFAULT_MSG_ADDR-USER_NVRAM_START_ADDR;
 		memcpy(&userNvram[offset],sn,NV_ID_DEFAULT_MSG_SIZE_BYTE);
 		status=Flash_If_Write(userNvram, USER_NVRAM_START_ADDR, USER_NVRAM_SIZE);
+		printf("flash write status = %d \r\n",status);
 		Flash_If_DeInit();
 		return status;
 	}

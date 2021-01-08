@@ -32,6 +32,7 @@ extern void set_moto_work(uint8_t enable);
 uint8_t lte_count =1;
 extern uint8_t lte_network_flag;
 extern uint8_t tcp_connect_flag;
+extern uint8_t phone_num_buf[11];
 void LteTimerCallback(void const * argument)
 {
 	
@@ -45,7 +46,8 @@ void LteTimerCallback(void const * argument)
 							//}
 					
 				//}
-	
+		//		set_nvram_id_data(phone_num_buf);
+			//set_nvram_id_data(phone_num_buf);
 			if(lte_count ==15){
 					send_bd1_get_card_num();
 				}
@@ -123,73 +125,54 @@ int16_t lte_data_handle(uint8_t *data, uint16_t len)
 
 
 
-uint8_t lte_at_cmp[50] = {'+','C','P','I','N',':',0x20,'R','E','A','D','Y'};//##\r\n
+uint8_t send_failed_count;
+
 void lte_receive_and_handle(void)
 {
 	uint8_t i =0,len = 0,lenth =0,lenth1,lenth2 ,lenth3,lenth5,lenth6,lenth7,lenth8,lenth9,temp[30]={0};
 	
 	memset(lte_uart_data_loop,0x00,sizeof(lte_uart_data_loop));
 	hw_uart1_receive(lte_uart_data_loop, &lte_uart_data_loop_len, 0xff);
-	printf("lte:%s \r\n",lte_uart_data_loop);
+	printf("lte rece :%d %s \r\n",lte_uart_data_loop_len,lte_uart_data_loop);
 	
-	//HAL_UART_Transmit(&huart1, lte_uart_data_loop[1], lte_uart_data_loop_len, 0xFFFF);
+	if(lte_uart_data_loop_len ==68){
+		send_failed_count ++;
+	}else if(lte_uart_data_loop_len ==95){
+		send_failed_count =0;
+	
+	}
 	if (lte_uart_data_loop_len>0)
 	{
+		
 		len = strlen("+CME ERROR: SIM not inserted");
 		lenth = strlen("+CPIN: READY");
 		lenth1=strlen("PB DONE");
-		lenth2 = strlen("+NETOPEN: 0");
-		lenth3 = strlen("+CIPSEND: 0,76,76");
-		lenth5 = strlen("INFOBEAT:");
-		lenth6 = strlen("+CIPOPEN: 0,4");
-		lenth7 = strlen("+CIPERROR: 2");
-		lenth8 = strlen("+CIPOPEN=0");
-		lenth9 = strlen("+CIPEVENT");
-		//printf("len = %d \r\n",len);
+		
 		memcpy(temp,&lte_uart_data_loop[2],len);
 		printf("temp %s \r\n",temp);
 		if(0 == memcmp("+CME ERROR: SIM not inserted",temp,len)){
-				task_test_mail_put("nosim",5);
+				//task_test_mail_put("nosim",5);
 					//printf("sim is no insterted\r\n");
 					memset(temp,0x00,30);
 		}else if(0 == memcmp("+CPIN: READY",temp,lenth)){
-				task_test_mail_put("insim",5);
+				//task_test_mail_put("insim",5);
+			lte_network_flag =1;
 					//printf("sim is insterted\r\n");
 			memset(temp,0x00,30);
 		}else if(0 == memcmp("PB DONE",temp,lenth1)){
 				//task_test_mail_put("connect",7);
+			lte_network_flag =1;
 				printf("connect\r\n");
 			memset(temp,0x00,30);
-		}else if(0 == memcmp("+NETOPEN: 0",temp,lenth2)){
-			//	task_test_mail_put("tcpconnect",10);
-			//	printf("tcp connect\r\n");
-			memset(temp,0x00,30);
-		}else if((0 == memcmp("+CIPSEND=0,76",temp,13))||(0 == memcmp("+CIPSEND: 0,76,76",temp,lenth3)) ||(0 == memcmp("INFOBEAT:",temp,lenth5))){
-			//	task_test_mail_put("ltesend",7);
-			//	printf("tcp connect send\r\n");
-			memset(temp,0x00,30);
-		}else if(0 == memcmp("+CIPOPEN: 0,4",temp,lenth6)){
-				//task_test_mail_put("tcpconnectagain",15);
-			//	printf("tcp connect\r\n");
-			memset(temp,0x00,30);
+		}else if(0== memcmp("+CIPERROR: 4",temp,12)){
+		
+			send_failed_count ++;
+			printf("lte send failed %d \r\n",send_failed_count);
+		}else if(0== memcmp("+CIPSEND: 0,68,68",temp,17)){
+			send_failed_count =0;
 		}
-		else if((0 == memcmp("+CIPERROR: 2",temp,lenth7))||(0 == memcmp("+CIPERROR: 4",temp,lenth7))){
-			//	task_test_mail_put("tcpconnectagain",15);
-				//printf("tcp connect again\r\n");
-			memset(temp,0x00,30);
-		}else if(0 == memcmp("+CIPOPEN=0",temp,lenth8)){
-			//	task_test_mail_put("ltesend",7);
-				//printf("tcp connect\r\n");
-			memset(temp,0x00,30);
-		
-	} 
-		if(0 == memcmp("+CIPEVENT",temp,lenth9)){
-			//	task_test_mail_put("ltesend",7);
-			//task_test_mail_put("connect",7);
-			//	printf("tcp connect\r\n");
-			memset(temp,0x00,30);
-		
-	}
+
+	
 }
 }
 void lte_send_data(void)

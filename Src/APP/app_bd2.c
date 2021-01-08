@@ -227,7 +227,7 @@ nmea_reader_update_speed(Token speed )
     return 0;
 }
 
-
+uint8_t date_buf[6]={0};
 void nmea_data_rmc_parse(NmeaTokenizer* tzer)
 {
 	Token  tok_time          = nmea_tokenizer_get(tzer,1);
@@ -241,6 +241,10 @@ void nmea_data_rmc_parse(NmeaTokenizer* tzer)
 	Token  tok_date          = nmea_tokenizer_get(tzer,9);
 
 	// VER("in RMC, fixStatus=%c", tok_fixStatus.p[0]);
+	//printf("sunmny tok_date %s \r\n",tok_date.p);
+	if(tok_date.p[0]!=','&&tok_date.p[1]!=','&&tok_date.p[2]!=',')
+			memcpy(date_buf,tok_date.p,6);
+	//printf("sunmny date_buf %s \r\n",date_buf);
 	if (tok_fixStatus.p[0] == 'A')
 	{
 	    nmea_reader_update_date(tok_date, tok_time );
@@ -270,6 +274,8 @@ static void add_separator_comma(uint8_t *data)
 		*data=',';
 }
 extern uint8_t gsn_buf[12];
+extern uint8_t bat_rsoc;
+
 uint16_t make_location_response(void)
 {
 	#if 0
@@ -333,9 +339,9 @@ uint16_t make_location_response(void)
 	uint16_t totlelen=0;
 	uint16_t len=0;
 
-	len=strlen(response_location_header);
-	memcpy(response_location,response_location_header,len);
-	totlelen+=len;
+	//len=strlen(response_location_header);
+	memcpy(response_location,response_location_header,11);
+	totlelen+=11;
 	
 	memcpy(&response_location[totlelen],gsn_buf,12);
 	totlelen+=12;
@@ -343,8 +349,8 @@ uint16_t make_location_response(void)
 	totlelen+=1;
 	len=strlen(gpslocation.latitude);
 	if(len<1){
-		memcpy(&response_location[totlelen],"F",1);
-	totlelen+=1;
+		memcpy(&response_location[totlelen],"FFFFFFFFFF",10);
+	totlelen+=10;
 	}else{
 	memcpy(&response_location[totlelen],gpslocation.latitude,len);
 	totlelen+=len;
@@ -365,8 +371,8 @@ uint16_t make_location_response(void)
 
 	len=strlen(gpslocation.longitude);
 	if(len <1){
-		memcpy(&response_location[totlelen],"F",1);
-		totlelen+=1;
+		memcpy(&response_location[totlelen],"FFFFFFFFFFF",11);
+		totlelen+=11;
 	}else{
 	memcpy(&response_location[totlelen],gpslocation.longitude,len);
 	totlelen+=len;
@@ -388,26 +394,53 @@ uint16_t make_location_response(void)
 	totlelen+=1;
 
 
-	len=strlen(gpslocation.speed);
-	if(len <1){
-			memcpy(&response_location[totlelen],"F",1);
-		totlelen+=1;
-	}else {
-	memcpy(&response_location[totlelen],gpslocation.speed,len);
-	totlelen+=len;
+	//len=strlen(gpslocation.speed);
+	//if(len <1){
+		//	memcpy(&response_location[totlelen],"FFFFF",5);
+		//totlelen+=5;
+	//}else {
+	//memcpy(&response_location[totlelen],gpslocation.speed,len);
+	//totlelen+=len;
+	//}
+	
+	//response_location[totlelen] = ',';
+	//	totlelen+=1;
+	//len=strlen(gpslocation.speed);
+	if(date_buf[0]!=0&&date_buf[1]!=0&&date_buf[2]!=0&&date_buf[3]!=0){
+	
+	
+	memcpy(&response_location[totlelen],date_buf,6);
+	totlelen+=6;
+	
+	}else{
+	   memcpy(&response_location[totlelen],"FFFFFF",6);
+		totlelen+=6;
+	
 	}
 	response_location[totlelen] = ',';
+		totlelen+=1;
+	len=strlen(gpslocation.time);
+	if(len <1){
+			memcpy(&response_location[totlelen],"FFFFFF",6);
+		totlelen+=6;
+	}else {
+	memcpy(&response_location[totlelen],gpslocation.time,len);
+	totlelen+=len;
+	}
+//	memcpy(&response_location[totlelen],gpslocation.time,len);
 	
-	response_location[totlelen] = '0';
-	
-	response_location[totlelen] = ',';
-	
-	response_location[totlelen] = '3';
-	
+	//response_location[totlelen] = ',';
+	//	totlelen+=1;
+	//response_location[totlelen] = '0';
+	//	totlelen+=1;
+	//response_location[totlelen] = ',';
+		//totlelen+=1;
+	//response_location[totlelen] = bat_rsoc + '0';
+	//totlelen+=1;
 	
 	memcpy(&response_location[totlelen],"##\r\n",4);
 	totlelen+=4;
-	
+	//printf("response_location  %d ,%s \r\n",totlelen,response_location);
 	bd_totlelen = totlelen;
 	
 	return totlelen;
@@ -418,7 +451,7 @@ uint8_t location_flag =0;
 
 void nmea_data_parse(uint8_t *data, uint16_t len)
 {
-	//printf("nmea_data_parse \r\n");
+	
 	uint16_t resp_len;
 	if((0==memcmp(data, "$GNGGA", 6)) || (0==memcmp(data, "$GPGGA", 6)))
 	{
@@ -433,18 +466,20 @@ void nmea_data_parse(uint8_t *data, uint16_t len)
 	{
 		NmeaTokenizer  tzer[1];
 		Token          tok;
-		
+		//printf("nmea_data_parse %s \r\n",data);
 		nmea_tokenizer_init(tzer, data, data+len);
 		nmea_data_rmc_parse(tzer);
 		//hw_uart2_send(data, len);
 	}
   //printf("gpslocation.flags = %x \r\n",gpslocation.flags);
-	if((gpslocation.flags & GPS_LOCATION_HAS_LAT_LONG) && (gpslocation.flags &GPS_LOCATION_HAS_SPEED) && (gpslocation.flags &GPS_LOCATION_HAS_DATATIME))
+	if((gpslocation.flags & GPS_LOCATION_HAS_LAT_LONG)  )
 	{
 		resp_len=make_location_response();
 		ft_dev.rn_flags = 1;
 	//	printf("ft_dev.rn_flags = %d \r\n",ft_dev.rn_flags);
 		
+	}else{
+		resp_len=make_location_response();
 	}
 	
 }

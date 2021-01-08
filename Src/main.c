@@ -351,112 +351,17 @@ int main(void)
 
 			task_init();
 			MX_DMA_Init();
-			MX_SDMMC1_SD_Init();	
-			MX_FATFS_Init();
+			//MX_SDMMC1_SD_Init();	
+			//MX_FATFS_Init();
 			aw9523_init_led();	
 			tmd2772_init();
 			power_flag =1;
 			init_flag = RESET;
 				set_ble_work(0);
-			State = HAL_SD_GetCardState(&hsd1);
+			//State = HAL_SD_GetCardState(&hsd1);
 
-			if(State == HAL_SD_CARD_TRANSFER)
-			{
-				HAL_SD_GetCardCID(&hsd1,&SD_CardCID);
-				printf("\r\n Initialize SD card successfully!\r\n\r\n");
-				printf(" SD card information! \r\n");
-				printf(" CardCapacity  : %llu \r\n",((unsigned long long)hsd1.SdCard.BlockSize*hsd1.SdCard.BlockNbr));
-				printf(" CardBlockSize : %d \r\n",hsd1.SdCard.BlockSize);
-				printf(" RCA           : %d \r\n",hsd1.SdCard.RelCardAdd);
-				printf(" CardType      : %d \r\n",hsd1.SdCard.CardType);
-				printf(" ManufacturerID: %d \r\n",SD_CardCID.ManufacturerID);
-					
-			}
-			else
-			{
-					printf("SD卡初始化失败\n" );
-
-			}
-			if(retSD == 0)
-			{
-
-			f_res = f_mount(&fs,SDPath,1);
-			
-
-
-				if(f_res == FR_NO_FILESYSTEM)
-				{
-			
-
-					f_res=f_mkfs((TCHAR const*)SDPath,0,0,0,0);							
-					
-					if(f_res == FR_OK)
-					{
-			 
-
-						f_res = f_mount(NULL,(TCHAR const*)SDPath,1);			
-						
-						f_res = f_mount(&fs,(TCHAR const*)SDPath,1);
-					}
-					else
-					{
-						 printf("《《格式化失败。》》\r\n");
-					 
-					}
-				}
-				else if(f_res!=FR_OK)
-				{
-					printf("！！SD卡挂载文件系统失败。(%d)\r\n",f_res);
-			 
-				
-				}
-				else
-				{
-					printf("mount fs ok\r\n");
-				}
-		printf("！！加解密测试开始\r\n");
 		
-		/*
-		ret1 = SKF_ConnectDev("stc08.txt",&hDev);
-		if(ret1){
-			LOGE("==%s-%d===[ SKF_ConnectDev err: %x.]===\n", func, __LINE__, ret1);
-			return ret1;
-		}
-		*/
-		#if 0
-		//for(j=0;j<testNum;j++){
-			memset(plainData,0,sizeof(plainData));
-			memset(pucCData,0,sizeof(pucCData));
-			memset(pucID,0,sizeof(pucID));
-			memset(uID,0,sizeof(uID));
-			
-			ret2 = TF_GetDeviceID(uID,&uIDLen);
-			if(ret2){
-				LOGE("==%s-%d===[ TF_GetDeviceID err: %x.]===\n", func, __LINE__, ret2);
-				return ret2;
-			}
-			
-			ret3 = TF_EncData((unsigned char *)pucData,uiDataLen,pucCData,&puicDataLen);
-			if(ret3){
-				printf("==%s-%d===[ TF_EncData TF_EncData: %x.]===\n", func, __LINE__, ret3);
-				return ret3;
-			}
-			
-			printf("puicDataLen:%d\n",puicDataLen);
-			
- 			ret4 = TF_DecData(pucCData,puicDataLen,plainData,&plainDataLen);
-			if(ret4){
-				LOGE("==%s-%d===[ TF_DecData TF_EncData: %x.]===\n", func, __LINE__, ret4);
-				return ret4;
-			}
-			for(i = 0;i<30;i++){
-			    printf("plainData[%d] : 0x%x \r\n",i,plainData[i]);
-			}
-				printf("plainDataLen:%d\n",plainDataLen);
-		//}
-		
-		printf("！！加解密测试结束\r\n");
-		#endif
+	
     
     
 
@@ -464,7 +369,7 @@ int main(void)
   
 
    // FATFS_UnLinkDriver(SDPath);
-	}
+	
 	
 			
 			

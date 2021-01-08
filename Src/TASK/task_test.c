@@ -4,7 +4,7 @@
 #include <stdint.h>
 #include "task_meerwespe.h"
 
-extern osMailQId    mytestQueueHandle;
+
 extern  UART_HandleTypeDef huart1;
 extern osStatus task_lte_message_put(uint32_t info);
 extern osStatus osTimerStop (osTimerId timer_id);
@@ -17,31 +17,24 @@ extern uint8_t tcp_connect_flag =0;
 osStatus task_test_message_put(uint32_t info)
 {
   	osStatus  status = osOK;
-	status = osMessagePut(mytestQueueHandle, info, osWaitForever);
+	
 	 
 	return status;
 }
 
 osEvent task_test_message_get(void)
 {
-  return osMessageGet(mytestQueueHandle, osWaitForever);
+  
 }
 
 osStatus task_test_mail_put(uint8_t *data, uint16_t len)
 {
-	mytestmail *pblemail;
-	pblemail=osMailCAlloc(mytestQueueHandle, osWaitForever);
-	if(len>BLE_MAIL_BUF_LEN)
-		pblemail->len=BLE_MAIL_BUF_LEN;
-	else
-		pblemail->len=len;
-	memcpy(pblemail->data,data,pblemail->len);
-	return osMailPut(mytestQueueHandle, pblemail);
+	
 }
 
 osEvent task_test_mail_get(void)
 {
-	return osMailGet(mytestQueueHandle,osWaitForever);//parameter to do, 20181025
+
 }
 
 /* SensorTask function */
@@ -50,6 +43,7 @@ uint8_t lte_network_flag =0;
 
 uint8_t lte_init_flag =0;
 
+extern uint8_t phone_num_buf[11];
 void mytestTask(void const * argument)
 {
 	osEvent event;
@@ -78,7 +72,8 @@ void mytestTask(void const * argument)
 							lte_network_flag =0;
 			}if(memcmp(pblemail->data,"insim",5) == 0){
 						 printf("sim is insterted\r\n");
-							lte_network_flag =1;		
+							lte_network_flag =1;
+							//lte_init_network();
 			}else if(memcmp(pblemail->data,"nobd1",5) == 0){
 						 printf("bd1 card no in \r\n");
 							set_rd_led_red();
@@ -94,6 +89,8 @@ void mytestTask(void const * argument)
 			}else if(memcmp(pblemail->data,"connect",7) == 0){
 				printf("lte connect \r\n");
 			//	lte_init_network();
+				
+			
 				lte_init_flag =1;
 						//rd_send_msg(bd_receiver_num,"sunmny",6);
 			}else if(memcmp(pblemail->data,"tcpconnect",10) == 0){
@@ -119,7 +116,7 @@ void mytestTask(void const * argument)
 						//rd_send_msg(bd_receiver_num,"sunmny",6);
 			}
 		
-			  osMailFree(mytestQueueHandle, pblemail); 
+			 // osMailFree(mytestQueueHandle, pblemail); 
 
 	
 
@@ -129,19 +126,25 @@ void mytestTask(void const * argument)
 #if 1
 //extern uint32_t wwdog_delay;
 extern  IWDG_HandleTypeDef   IwdgHandle;
+extern uint8_t binded_flag;
  //extern uint32_t TimeoutCalculation(uint32_t timevalue);
-uint32_t bd_num = 927237;
-extern uint8_t bd_totlelen;
-extern uint8_t response_location[128];
+
+extern uint8_t tempbuf[11];
+uint8_t save_flag =0;
 void mytestTask1(void const * argument)
 {
 	while(1){
-			osDelay(300000);
-		printf("task set local_data \r\n");
-	set_local_data();
 		
-		rd_send_msg(bd_num,response_location,bd_totlelen);
-		printf("task set local_dataafeter \r\n");
+				if(phone_num_buf[0]!='1' && tempbuf[0] == '1'){
+				if(save_flag ==0){
+					set_nvram_id_data(phone_num_buf);
+					osDelay(500);
+					set_nvram_id_data(phone_num_buf);
+					save_flag =1;
+					get_nvram_id(phone_num_buf);
+				  }
+				}
+	
 	}
 	#if 0
 	app_nfc_init();

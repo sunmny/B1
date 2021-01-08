@@ -38,8 +38,8 @@ uint8_t tcp_buf[39];
 uint8_t apn_buf[50];
 uint8_t apn_buf1[81];
 uint8_t ping_buf[50];
-extern  uint8_t report_data[128];
-extern  uint8_t report_data1[200];
+//extern  uint8_t report_data[128];
+//extern  uint8_t report_data1[200];
 //uint8_t apn_buf[70] ={"hellrelelelelelel"};
 
 void lte_close_tcp_network(void)
@@ -70,18 +70,18 @@ void lte_tcp_connect_network(void)
 		//osDelay(2000);
 		//HAL_UART_Transmit(&huart1,report_data,80,0xffff);
 }
-
+extern uint8_t response_location[128];
 void lte_tcp_send_data(void)
 {
-		
-		HAL_UART_Transmit(&huart1,(uint8_t *)"AT+CIPSEND=0,76\r\n", 20,0xffff);
+		//printf("report_data1 = %s \r\n",report_data1);
+		HAL_UART_Transmit(&huart1,(uint8_t *)"AT+CIPSEND=0,68\r\n",19,0xffff);
 		osDelay(2000);
-		HAL_UART_Transmit(&huart1,report_data1,76,0xffff);
+		HAL_UART_Transmit(&huart1,response_location,68,0xffff);
 		osDelay(2000);
 	//HAL_UART_Transmit(&huart1,(uint8_t *)"AT+CIPCLOSE=0\r\n", 17,0xffff);
 	 
 }
-
+extern uint8_t phone_num_buf[11];
 void apn_init(void)
 {
 
@@ -139,7 +139,8 @@ void apn_init(void)
 			apn_buf[48] = '3';
 			apn_buf[49] = '"';
 
-
+		if(phone_num_buf[0] == '1')
+			 memcpy(&apn_buf[13],phone_num_buf,11);
 }
 void lte_init_network(void)
 {
@@ -360,7 +361,7 @@ void hw_lte_init(void)
 
 	printf("hw_lte_init ok\r\n");
 		osDelay(500);
-	HAL_UART_Transmit(&huart1, (uint8_t *)"ATS0=3\r\n", 13, 0xFFFF);
+	//HAL_UART_Transmit(&huart1, (uint8_t *)"ATS0=3\r\n", 13, 0xFFFF);
 	
 	apn_init();
 
@@ -409,7 +410,7 @@ uint8_t app_init(void)
 	delay_ms(100);
 	hw_buzzer_enable(0);
 		
-	memset(report_data,0x00,128);
+	//memset(report_data,0x00,128);
 	memset(response_location,0x00,128);
 //HAL_UART_Transmit(&huart4,"hello\r\n",9, 0xFFFF);
 	return 0;

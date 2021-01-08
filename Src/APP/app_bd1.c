@@ -167,10 +167,10 @@ void rd_rx_data_handle(uint8_t * data, uint16_t len)
 
 		if(memcmp("097151",rd_num,6) == 0){
 				set_rd_led_red();
-				task_test_mail_put("nobd1",5);
+	//			task_test_mail_put("nobd1",5);
 			}else{
 				set_rd_led_red_close();
-			task_test_mail_put("inbd1",5);
+	//		task_test_mail_put("inbd1",5);
 			}
 			//printf("rd_num %s \r\n",rd_num);
 	}else if(memcmp(data,"$BDBSI",6) == 0){
@@ -235,7 +235,7 @@ extern  UART_HandleTypeDef huart3;
 void rd_receive_and_handle()
 {
 
-	 printf("uart2_rec_buf %s \r\n",uart2_rec_buf);
+	// printf("uart2_rec_buf %s \r\n",uart2_rec_buf);
 	// HAL_UART_Transmit(&huart3,uart2_rec_buf,bd1_rx_len, 0xFFFF);
 	 //HAL_UART_Transmit(&huart2,uart2_rec_buf,bd1_rx_len, 0xFFFF);
 

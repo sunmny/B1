@@ -1554,7 +1554,7 @@ void HAL_UART_IRQHandler(UART_HandleTypeDef *huart)
 			send_notify_ble_task();
 		}else if(huart->Instance == USART3){
 		  //  printf("cr1its11 = %x \r\n",cr1its);
-			send_notify_gps_task();
+//			 send_notify_gps_task();
 		}else if(huart->Instance == USART1){
 		 //   printf("cr1its11 = %x \r\n",cr1its);
 			send_notify_lte_task();

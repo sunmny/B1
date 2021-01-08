@@ -21,44 +21,36 @@
 extern WORK_MODE work_mode;
 extern WORK_SEND_MODE  work_send_mode;
 
-extern osMessageQId BleQueueHandle;
+
 
 extern uint8_t wakeup_init_flag;
 
 extern  WORK_SEND_MODE work_send_mode_huxi ;
 
-extern osMailQId BleMailQueueHandle;
-extern osThreadId BleHandle;
+
 
 osStatus task_ble_message_put(uint32_t info)
 {
   	osStatus  status = osOK;
-	status = osMessagePut(BleQueueHandle, info, osWaitForever);
+	
 	 
 	return status;
 }
 
 osEvent task_ble_message_get(void)
 {
-  return osMessageGet(BleQueueHandle, osWaitForever);
+  
 }
 
 osStatus task_ble_mail_put(uint8_t *data, uint16_t len)
 {
-	blemail *pblemail;
-	pblemail=osMailCAlloc(BleMailQueueHandle, osWaitForever);
-	if(len>BLE_MAIL_BUF_LEN)
-		pblemail->len=BLE_MAIL_BUF_LEN;
-	else
-		pblemail->len=len;
-	memcpy(pblemail->data,data,pblemail->len);
-	return osMailPut(BleMailQueueHandle, pblemail);
+	
 }
 extern uint8_t link_buf[256];
 
 osEvent task_ble_mail_get(void)
 {
-	return osMailGet(BleMailQueueHandle,osWaitForever);//parameter to do, 20181025
+//	return osMailGet(BleMailQueueHandle,osWaitForever);//parameter to do, 20181025
 }
 
 extern ADC_HandleTypeDef        AdcHandle;
@@ -73,7 +65,7 @@ void BleTask(void const * argument)
   {
 
    ulTaskNotifyTake( pdTRUE, portMAX_DELAY);
-		//printf("BleTask ---2\r\n");
+		printf("BleTask ---2\r\n");
 		//osDelay(1000);
 		ble_receive_and_handle();
 

@@ -19,8 +19,7 @@
 extern WORK_SEND_MODE  work_send_mode;
 extern uint8_t first_flag;
 
-extern osMessageQId GpsQueueHandle;
-extern osMessageQId LoRaQueueHandle;
+
 
 extern uint8_t wakeup_init_flag;
 
@@ -36,12 +35,12 @@ osStatus task_gps_message_put(uint32_t info)
 	 {
 		 //hw_gps_open();
 		 	  gps_state = gps_open;
-    status = osMessagePut(GpsQueueHandle, info, 5000);
+   // status = osMessagePut(GpsQueueHandle, info, 5000);
 
 	 }else
 	 {
 	   //查看当前发送状态
-	   status = osMessagePut(GpsQueueHandle, info, 5000);
+	   //status = osMessagePut(GpsQueueHandle, info, 5000);
 	 
 	 }
 	  return status;
@@ -49,7 +48,7 @@ osStatus task_gps_message_put(uint32_t info)
 
 osEvent task_gps_message_get(void)
 {
-  return osMessageGet(GpsQueueHandle,osWaitForever);
+  //return osMessageGet(GpsQueueHandle,osWaitForever);
 }
 
 
@@ -58,8 +57,8 @@ osEvent task_gps_message_get(void)
 
 
 /* GpsTask function */
-uint8_t report_data[128]={0};
-uint8_t report_data1[200]={0};
+//uint8_t report_data[128]={0};
+//uint8_t report_data1[200]={0};
 extern uint8_t dis_data[10];
 extern osTimerId LteTimerHandle;
 static uint8_t len ;
@@ -75,8 +74,8 @@ void set_local_data(void)
 	//	uint8_t pucData[32];
 		//unsigned int uiDataLen,puicDataLen=30;
 		//uint8_t pucCData[64];
-	get_zdevice_location_response();
-	memcpy(report_data1,response_location,bd_totlelen);
+	//get_zdevice_location_response();
+	//memcpy(report_data1,response_location,bd_totlelen);
 	#if 0
 		memcpy(report_data,pack_head_andid,11);
 		memcpy(&report_data[11],gsn_buf,12);
@@ -130,8 +129,8 @@ void GpsTask(void const * argument)
   for(;;)
   {
 		//printf("GpsTask ---1\r\n");
-		//osDelay(1000);
-		ulTaskNotifyTake(pdTRUE, portMAX_DELAY);
+		osDelay(2000);
+		//ulTaskNotifyTake(pdTRUE, portMAX_DELAY);
 			//printf("GpsTask\r\n");
 		rn_receive_and_handle();
 	}
